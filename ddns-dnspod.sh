@@ -236,7 +236,7 @@ exiterr() {
 
 echo -n '初始化...'
 export TMPDIR='/tmp/ddns-dnspod'
-export OLDIPFILE="/var/run/ddns-dnspod-oldip"
+export OLDIPFILE="/tmp/ddns-dnspod-oldip"
 init
 echo '[done]'
 
