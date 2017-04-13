@@ -1,8 +1,10 @@
 # DDNS-Dnspod
 利用shell实现的dnspod的DDNS
 
-##安装
-克隆至本地
+#安装
+克隆至本地，一般来说按我的习惯是克隆到/usr/local/ddns-dnspod
+
+然后
 
 cp config.sh.example config.sh
 
@@ -18,10 +20,11 @@ domain填入你的域名
 
 record填入你的记录名
 
-##使用
+#使用
 直接运行
 
 ddns-dnspod.sh
 
-建议搭配cron食用
+建议搭配cron食用，比如
 
+ln -s /usr/local/ddns-dnspod/ddns-dnspod.cron.example /etc/cron.d/ddns-dnspod
