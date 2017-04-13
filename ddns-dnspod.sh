@@ -261,7 +261,7 @@ else
 fi
 
 echo -n '读取配置文件...'
-. ./config.sh
+. "$(dirname $0)/config.sh"
 echo '[done]'
 
 echo -n '获取domain_id...'
