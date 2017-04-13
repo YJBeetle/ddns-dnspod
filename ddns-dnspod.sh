@@ -34,6 +34,30 @@ read_xml_dom() {
     return $ret
 }
 
+
+get_localip_curl()
+{
+    ip=$(curl "$1" 2>/dev/null)
+    ip=$(echo "$ip" | grep -o "\d*\.\d*\.\d*\.\d*")
+    if [ "$ip" = '' ]; then
+        return -1
+    fi
+    echo "$ip"
+}
+
+get_localip()
+{
+    get_localip_curl 'ip.cn' ||
+    get_localip_curl 'api.ipify.org' ||
+    get_localip_curl 'icanhazip.com' ||
+    get_localip_curl 'ident.me' ||
+    get_localip_curl 'whatismyip.akamai.com' ||
+    get_localip_curl 'myip.dnsomatic.com' ||
+    get_localip_curl 'ifconfig.me' ||
+    return -1
+}
+
+
 get_domain_id()
 {
     login_token=$1
@@ -212,8 +236,29 @@ exiterr() {
 
 echo -n '初始化...'
 export TMPDIR='/tmp/ddns-dnspod'
+export OLDIPFILE="/var/run/ddns-dnspod-oldip"
 init
 echo '[done]'
+
+echo -n '获取本地公网IP...'
+ip=$(get_localip) ||
+{
+    echo '[error]'
+    return -1
+} &&
+{
+    echo "[$ip]"
+}
+
+echo -n '比较上次IP...'
+oldip=$(cat "$OLDIPFILE" 2>/dev/null)
+if [ "$oldip" = "$ip" ]; then
+    echo '[nochange]'
+    exit 0
+else
+    echo "$ip" 2>/dev/null > $OLDIPFILE
+    echo "[change]"
+fi
 
 echo -n '读取配置文件...'
 . ./config.sh
@@ -258,9 +303,6 @@ return=$(ddns_record "$login_token" "$domain_id" "$record_id" "$record") ||
 }
 value=$return
 echo "[$value]"
-
-
-
 
 clean
 exit 0
