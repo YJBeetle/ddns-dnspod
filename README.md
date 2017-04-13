@@ -1,10 +1,27 @@
 # DDNS-Dnspod
 利用shell实现的dnspod的DDNS
 
-配置文件案例：
-    config.sh.example
-把它复制为config.sh填写内容就可以了
+##安装
+克隆至本地
 
-然后运行ddns-dnspod.sh
+cp config.sh.example config.sh
+
+编辑config.sh
+
+其中login_token需要填入在dnspod创建的token
+
+位置在：用户中心 -> 安全设置 -> API Token
+
+快捷链接：https://www.dnspod.cn/console/user/security
+
+domain填入你的域名
+
+record填入你的记录名
+
+##使用
+直接运行
+
+ddns-dnspod.sh
 
 建议搭配cron食用
+
