@@ -1,2 +1,0 @@
-#dns record update
-*/1 * * * * root /usr/bin/bash /usr/local/bin/ddns-dnspod.sh >>/var/log/ddns-dnspod.log 2>&1
