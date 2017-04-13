@@ -82,8 +82,8 @@ get_domain_id()
 get_record_id()
 {
     login_token=$1
-    record=$2
-    domain_id=$3
+    domain_id=$2
+    record=$3
 
     local DOMLVL=0 #初始化节点
     id=''
@@ -131,8 +131,8 @@ get_record_id()
 create_record()
 {
     login_token=$1
-    record=$2
-    domain_id=$3
+    domain_id=$2
+    record=$3
 
     local DOMLVL=0 #初始化节点
 
@@ -151,6 +151,37 @@ create_record()
 
     if [ "$code" = '1' ]; then
         echo "$id";
+        return 0;
+    else
+        echo "$message";
+        return $code;
+    fi
+}
+
+ddns_record()
+{
+    login_token=$1
+    domain_id=$2
+    record_id=$3
+    record=$4
+
+    local DOMLVL=0 #初始化节点
+
+    curl -k https://dnsapi.cn/Record.Ddns -d "login_token=$login_token&domain_id=$domain_id&record_id=$record_id&sub_domain=$record&record_line=默认" 2>/dev/null > ${TMPDIR}/create_ddns.xml
+    while read_xml_dom; do
+        if [ "$ENTITY" = 'value' ]; then
+            value="$CONTENT"
+        fi
+        if [ "$ENTITY" = 'code' ]; then
+            code=$CONTENT
+        fi
+        if [ "$ENTITY" = 'message' ]; then
+            message="$CONTENT"
+        fi
+    done < ${TMPDIR}/create_ddns.xml
+
+    if [ "$code" = '1' ]; then
+        echo "$value";
         return 0;
     else
         echo "$message";
@@ -198,7 +229,7 @@ domain_id=$return
 echo "[$domain_id]"
 
 echo -n '获取record_id...'
-return=$(get_record_id "$login_token" "$record" "$domain_id") || 
+return=$(get_record_id "$login_token" "$domain_id" "$record") || 
 {
     echo '[error]'
     exiterr "$return"
@@ -208,7 +239,7 @@ if [ "$record_id" = '' ]; then
     echo '[null]'
 
     echo -n '没有找到对应record_id，创建新record并获取id...'
-    return=$(create_record "$login_token" "$record" "$domain_id") || 
+    return=$(create_record "$login_token" "$domain_id" "$record") || 
     {
         echo '[error]'
         exiterr "$return"
@@ -219,10 +250,16 @@ else
     echo "[$record_id]"
 fi
 
-echo $domain_id
-echo $record_id
+echo -n '更新DDNS...'
+return=$(ddns_record "$login_token" "$domain_id" "$record_id" "$record") || 
+{
+    echo '[error]'
+    exiterr "$return"
+}
+value=$return
+echo "[$value]"
 
-curl -k https://dnsapi.cn/Record.Ddns -d "login_token=${login_token}&domain_id=$domain_id&record_id=$record_id&sub_domain=$record&record_line=默认"
+
 
 
 clean
