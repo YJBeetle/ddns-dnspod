@@ -136,7 +136,7 @@ create_record()
 
     local DOMLVL=0 #初始化节点
 
-    curl -k https://dnsapi.cn/Record.Create -d "login_token=$login_token&domain_id=$domain_id&sub_domain=$record&record_type=TXT&record_line=默认&value=null" 2>/dev/null > ${TMPDIR}/create_record.xml
+    curl -k https://dnsapi.cn/Record.Create -d "login_token=$login_token&domain_id=$domain_id&sub_domain=$record&record_type=A&record_line=默认&value=0.0.0.0" 2>/dev/null > ${TMPDIR}/create_record.xml
     while read_xml_dom; do
         if [ "$ENTITY" = 'id' ]; then
             id="$CONTENT"
@@ -222,6 +222,7 @@ fi
 echo $domain_id
 echo $record_id
 
+curl -k https://dnsapi.cn/Record.Ddns -d "login_token=${login_token}&domain_id=$domain_id&record_id=$record_id&sub_domain=$record&record_line=默认"
 
 
 clean
