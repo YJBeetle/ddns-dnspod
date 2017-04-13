@@ -38,7 +38,7 @@ read_xml_dom() {
 get_localip_curl()
 {
     ip=$(curl "$1" 2>/dev/null)
-    ip=$(echo "$ip" | grep -o "\d*\.\d*\.\d*\.\d*")
+    ip=$(echo "$ip" | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*")
     if [ "$ip" = '' ]; then
         return -1
     fi
