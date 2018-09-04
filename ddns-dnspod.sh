@@ -256,7 +256,6 @@ if [ "$oldip" = "$ip" ]; then
     echo '[nochange]'
     exit 0
 else
-    echo "$ip" 2>/dev/null > $OLDIPFILE
     echo "[change]"
 fi
 
@@ -303,6 +302,8 @@ return=$(ddns_record "$login_token" "$domain_id" "$record_id" "$record") ||
 }
 value=$return
 echo "[$value]"
+
+echo "$ip" 2>/dev/null > $OLDIPFILE
 
 clean
 exit 0
