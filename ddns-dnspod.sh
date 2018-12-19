@@ -166,6 +166,9 @@ get_record_id()
     if [ "$code" = '1' ]; then
         echo "$okid";
         return 0;
+    elif [ "$code" = '10' ]; then
+        echo "";
+        return 0;
     else
         echo "$message";
         return $code;
@@ -178,10 +181,11 @@ create_record()
     domain_id=$2
     record=$3
     record_type=$4
+    value=$5
 
     local DOMLVL=0 #初始化节点
 
-    curl -k https://dnsapi.cn/Record.Create -d "login_token=$login_token&domain_id=$domain_id&sub_domain=$record&record_type=$record_type&record_line=默认&value=0.0.0.0" 2>/dev/null > ${TMPDIR}/create_record.xml
+    curl -k https://dnsapi.cn/Record.Create -d "login_token=$login_token&domain_id=$domain_id&sub_domain=$record&record_type=$record_type&record_line=默认&value=$value" 2>/dev/null > ${TMPDIR}/create_record.xml
     while read_xml_dom; do
         if [ "$ENTITY" = 'id' ]; then
             id="$CONTENT"
@@ -340,8 +344,8 @@ v4() {
     if [ "$record_id" = '' ]; then
         echo '[null]'
 
-        echo -n '没有找到对应record_id，创建新record并获取id...'
-        return=$(create_record "$login_token" "$domain_id" "$record" "A") || 
+        echo -n '没有找到对应record_id，创建新record...'
+        return=$(create_record "$login_token" "$domain_id" "$record" "A" "$ip") || 
         {
             echo '[error]'
             exiterr "$return"
@@ -350,16 +354,16 @@ v4() {
         echo "[$record_id]"
     else
         echo "[$record_id]"
-    fi
 
-    echo -n '更新DDNS...'
-    return=$(ddns_record "$login_token" "$domain_id" "$record_id" "$record") || 
-    {
-        echo '[error]'
-        exiterr "$return"
-    }
-    value=$return
-    echo "[$value]"
+        echo -n '更新DDNS...'
+        return=$(ddns_record "$login_token" "$domain_id" "$record_id" "$record") || 
+        {
+            echo '[error]'
+            exiterr "$return"
+        }
+        value=$return
+        echo "[$value]"
+    fi
 
     echo "$ip" 2>/dev/null > $OLDIPFILE
 }
@@ -403,8 +407,8 @@ v6() {
     if [ "$record_id" = '' ]; then
         echo '[null]'
 
-        echo -n '没有找到对应record_id，创建新record并获取id...'
-        return=$(create_record "$login_token" "$domain_id" "$record_v6" "AAAA") || 
+        echo -n '没有找到对应record_id，创建新record...'
+        return=$(create_record "$login_token" "$domain_id" "$record_v6" "AAAA" "$ipv6") || 
         {
             echo '[error]'
             exiterr "$return"
@@ -413,16 +417,16 @@ v6() {
         echo "[$record_id]"
     else
         echo "[$record_id]"
-    fi
 
-    echo -n '更新DDNS...'
-    return=$(ddns_record_v6 "$login_token" "$domain_id" "$record_id" "$record_v6" "$ipv6") || 
-    {
-        echo '[error]'
-        exiterr "$return"
-    }
-    value=$return
-    echo "[$value]"
+        echo -n '更新DDNS...'
+        return=$(ddns_record_v6 "$login_token" "$domain_id" "$record_id" "$record_v6" "$ipv6") || 
+        {
+            echo '[error]'
+            exiterr "$return"
+        }
+        value=$return
+        echo "[$value]"
+    fi
 
     echo "$ipv6" 2>/dev/null > $OLDIPFILEV6
 }
