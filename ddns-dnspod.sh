@@ -47,7 +47,6 @@ get_localip_curl()
 
 get_localip()
 {
-    get_localip_curl 'ip.cn' ||
     get_localip_curl 'api.ipify.org' ||
     get_localip_curl 'icanhazip.com' ||
     get_localip_curl 'ident.me' ||
