@@ -6,3 +6,4 @@ export domain='example.com'
 
 #record
 export record='www'
+export record_v6='www'
