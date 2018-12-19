@@ -2,13 +2,13 @@
 利用shell实现的dnspod的DDNS
 
 # 安装
-克隆至本地，一般来说按我的习惯是克隆到/usr/local/ddns-dnspod
-
-然后
-
+```
+cd /usr/local/
+git clone https://github.com/YJBeetle/ddns-dnspod.git
 cp config.sh.example config.sh
+```
 
-编辑config.sh
+用你喜欢的编辑器编辑config.sh文件
 
 其中login_token需要填入在dnspod创建的token
 
@@ -26,5 +26,6 @@ record填入你的记录名
 ddns-dnspod.sh
 
 建议搭配cron食用，比如
-
+```
 ln -s /usr/local/ddns-dnspod/ddns-dnspod.cron.example /etc/cron.d/ddns-dnspod
+```
