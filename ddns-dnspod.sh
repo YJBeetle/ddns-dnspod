@@ -300,9 +300,6 @@ echo '[done]'
 
 echo -n '读取配置文件...'
 . "$(dirname $0)/config.sh"
-if [ "$record_v6" = "" ]; then
-    record_v6="$record"
-fi
 echo '[done]'
 
 v4() {
@@ -431,8 +428,16 @@ v6() {
     echo "$ipv6" 2>/dev/null > $OLDIPFILEV6
 }
 
-v4
-v6
+if [ "$record" = "" ]; then
+    echo '跳过IPv4'
+else
+    v4
+fi
+if [ "$record_v6" = "" ]; then
+    echo '跳过IPv6'
+else
+    v6
+fi
 
 clean
 exit 0
