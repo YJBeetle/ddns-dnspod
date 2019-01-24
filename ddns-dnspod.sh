@@ -73,7 +73,6 @@ get_localip_v6()
     return -1
 }
 
-
 get_domain_id()
 {
     login_token=$1
