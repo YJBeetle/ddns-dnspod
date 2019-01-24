@@ -48,8 +48,6 @@ get_localip_curl()
 get_localip()
 {
     get_localip_curl 'api.ipify.org' ||
-    get_localip_curl 'icanhazip.com' ||
-    get_localip_curl 'ident.me' ||
     get_localip_curl 'whatismyip.akamai.com' ||
     get_localip_curl 'myip.dnsomatic.com' ||
     get_localip_curl 'ifconfig.me' ||
