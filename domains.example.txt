@@ -1,0 +1,3 @@
+#login_token							#domain			#record		#ip_version
+12345,ffffeeeeddddccccbbbbaaaa99998888	example.com		@			4
+12345,ffffeeeeddddccccbbbbaaaa99998888	example2.com	test		6

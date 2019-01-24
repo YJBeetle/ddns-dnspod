@@ -1,9 +1,3 @@
-#login_token
-export login_token='id,token'
-
-#domain
-export domain='example.com'
-
-#record
-export record='www'
-export record_v6='www'
+#目录设定
+TMPDIR='/tmp/ddns_dnspod_tempfile'
+OLDIPDIR="/tmp/ddns_dnspod_oldip"

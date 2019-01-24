@@ -1,5 +1,4 @@
 /config.sh
+/domains.txt
 /tmp
-/certs
-/accounts
-/lock
+/oldip

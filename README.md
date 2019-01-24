@@ -5,10 +5,13 @@
 ```
 cd /usr/local/
 git clone https://github.com/YJBeetle/ddns-dnspod.git
-cp config.sh.example config.sh
+cp config.example.sh config.sh
+cp domains.example.txt domains.txt
 ```
 
-用你喜欢的编辑器编辑config.sh文件
+config.sh不用修改亦可正常使用，如有需求请自行对应修改。
+
+编辑domains.txt，填入token、domain以及record
 
 其中login_token需要填入在dnspod创建的token
 
@@ -22,8 +25,9 @@ record填入你的记录名
 
 # 使用
 直接运行
-
+```
 ddns-dnspod.sh
+```
 
 建议搭配cron食用，比如
 ```
