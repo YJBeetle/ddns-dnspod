@@ -34,7 +34,6 @@ read_xml_dom() {
     return $ret
 }
 
-
 get_localip_curl()
 {
     ip=$(curl -4 "$1" 2>/dev/null)
@@ -72,7 +71,6 @@ get_localip_v6()
     done
     return -1
 }
-
 
 get_domain_id()
 {
