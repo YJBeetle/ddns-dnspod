@@ -68,7 +68,7 @@ get_localip_v6()
 {
     for server in ${GETIPV6[@]}
     do
-        get_localip_curl "${server}" && return 0
+        get_localip_curl_v6 "${server}" && return 0
     done
     return -1
 }
@@ -291,144 +291,97 @@ main()
         record="$(printf '%s\n' "${line}" | cut -d' ' -f3)"
         ip_version="$(printf '%s\n' "${line}" | cut -d' ' -f4)"
 
-        #IPversion检查
-        if [[ -n "${ip_version}" ]]; then
-            if [[ "${ip_version}" = "4" ]]; then
-
-                echo -n '获取本地公网IP...'
-                ip=$(get_localip) ||
-                {
-                    echo '[error]'
-                    exiterr "获取本地公网IP失败"
-                } &&
-                {
-                    echo "[$ip]"
-                }
-
-                echo -n '比较上次IP...'
-                oldip=$(cat "$OLDIPDIR/$record.$domain.ipv4.txt" 2>/dev/null)
-                if [ "$oldip" = "$ip" ]; then
-                    echo '[nochange]'
-                    return 0
-                else
-                    echo "[change]"
-                fi
-
-                echo -n '获取domain_id...'
-                return=$(get_domain_id "$login_token" "$domain") || 
-                {
-                    echo '[error]'
-                    exiterr "$return"
-                }
-                domain_id=$return
-                echo "[$domain_id]"
-
-                echo -n '获取record_id...'
-                return=$(get_record_id "$login_token" "$domain_id" "$record" "A") || 
-                {
-                    echo '[error]'
-                    exiterr "$return"
-                }
-                record_id=$return
-                if [ "$record_id" = '' ]; then
-                    echo '[null]'
-
-                    echo -n '没有找到对应record_id，创建新record...'
-                    return=$(create_record "$login_token" "$domain_id" "$record" "A" "$ip") || 
-                    {
-                        echo '[error]'
-                        exiterr "$return"
-                    }
-                    record_id=$return
-                    echo "[$record_id]"
-                else
-                    echo "[$record_id]"
-
-                    echo -n '更新DDNS...'
-                    return=$(ddns_record "$login_token" "$domain_id" "$record_id" "$record") || 
-                    {
-                        echo '[error]'
-                        exiterr "$return"
-                    }
-                    value=$return
-                    echo "[$value]"
-                fi
-
-                echo "$ip" 2>/dev/null > "$OLDIPDIR/$record.$domain.ipv4.txt"
-
-            elif [[ "${ip_version}" = "6" ]]; then
-            
-                echo -n '获取本地公网IPv6...'
-                ipv6=$(get_localip_v6) ||
-                {
-                    echo '[error]'
-                    exiterr "获取本地公网IPv6失败"
-                } &&
-                {
-                    echo "[$ipv6]"
-                }
-
-                echo -n '比较上次IPv6...'
-                oldipv6=$(cat "$OLDIPDIR/$record.$domain.ipv6.txt" 2>/dev/null)
-                if [ "$oldipv6" = "$ipv6" ]; then
-                    echo '[nochange]'
-                    return 0
-                else
-                    echo "[change]"
-                fi
-
-                echo -n '获取domain_id...'
-                return=$(get_domain_id "$login_token" "$domain") || 
-                {
-                    echo '[error]'
-                    exiterr "$return"
-                }
-                domain_id=$return
-                echo "[$domain_id]"
-
-                echo -n '获取record_id...'
-                return=$(get_record_id "$login_token" "$domain_id" "$record" "AAAA") || 
-                {
-                    echo '[error]'
-                    exiterr "$return"
-                }
-                record_id=$return
-                if [ "$record_id" = '' ]; then
-                    echo '[null]'
-
-                    echo -n '没有找到对应record_id，创建新record...'
-                    return=$(create_record "$login_token" "$domain_id" "$record" "AAAA" "$ipv6") || 
-                    {
-                        echo '[error]'
-                        exiterr "$return"
-                    }
-                    record_id=$return
-                    echo "[$record_id]"
-                else
-                    echo "[$record_id]"
-
-                    echo -n '更新DDNS...'
-                    return=$(ddns_record_v6 "$login_token" "$domain_id" "$record_id" "$record" "$ipv6") || 
-                    {
-                        echo '[error]'
-                        exiterr "$return"
-                    }
-                    value=$return
-                    echo "[$value]"
-                fi
-
-                echo "$ipv6" 2>/dev/null > "$OLDIPDIR/$record.$domain.ipv6.txt"
-
-            else
-                exiterr "未知的IP版本 ${ip_version}，请修改domains.txt，在ip_version输入4或者6。"
-            fi
-        fi
-
         # echo $login_token
         # echo $domain
-        # echo $records
+        # echo $record
         # echo $ip_version
 
+        if [[ -n "${login_token}" ]];then
+            if [[ -n "${domain}" ]];then
+                if [[ -n "${record}" ]];then
+                    if [[ "${ip_version}" = "4" || "${ip_version}" = "6" ]]; then   #IPversion检查
+                        [[ "${ip_version}" = "4" ]] && ipv4='true' || ipv4='false'
+
+                        echo -n '获取公网IP...'
+                        ip=$($($ipv4) && get_localip || get_localip_v6) &&
+                        {
+                            echo "[$ip]"
+
+                            echo -n '比较上次IP...'
+                            oldip=$(cat "${OLDIPDIR}/${record}.${domain}.ipv${ip_version}.txt" 2>/dev/null)
+                            if [ "$oldip" = "$ip" ]; then
+                                echo '[nochange]'
+                            else
+                                echo "[change]"
+
+                                echo -n '获取domain_id...'
+                                return=$(get_domain_id "${login_token}" "${domain}") &&
+                                {
+                                    domain_id=$return
+                                    echo "[$domain_id]"
+
+                                    echo -n '获取record_id...'
+                                    return=$(get_record_id "${login_token}" "${domain_id}" "${record}" $($($ipv4) && echo 'A' || echo 'AAAA')) &&
+                                    {
+                                        record_id=$return
+                                        if [ "$record_id" = '' ]; then
+                                            echo '[null]'
+
+                                            echo -n '没有找到对应record_id，创建新record...'
+                                            return=$(create_record "${login_token}" "${domain_id}" "${record}" $($($ipv4) && echo 'A' || echo 'AAAA') "$ip") &&
+                                            {
+                                                record_id=$return
+                                                echo "[$record_id]"
+
+                                                echo "$ip" 2>/dev/null > "${OLDIPDIR}/${record}.${domain}.ipv${ip_version}.txt"
+                                            } || 
+                                            {
+                                                echo '[error]'
+                                                exiterr "$return"
+                                            }
+                                        else
+                                            echo "[$record_id]"
+
+                                            echo -n '更新DDNS...'
+                                            return=$($($ipv4) && ddns_record "${login_token}" "${domain_id}" "${record_id}" "${record}" || ddns_record_v6 "${login_token}" "${domain_id}" "${record_id}" "${record}" "${ip}") &&
+                                            {
+                                                value=$return
+                                                echo "[$value]"
+                                                echo "$ip" 2>/dev/null > "${OLDIPDIR}/${record}.${domain}.ipv${ip_version}.txt"
+                                            } || 
+                                            {
+                                                echo '[error]'
+                                                exiterr "$return"
+                                            }
+                                        fi
+                                    } || 
+                                    {
+                                        echo '[error]'
+                                        exiterr "$return"
+                                    }
+                                } || 
+                                {
+                                    echo '[error]'
+                                    err "$return"
+                                }
+                            fi
+                        } ||
+                        {
+                            echo '[error]'
+                            err "获取本地公网IP失败"
+                        }
+                    else
+                        err "未知的IP版本 ${ip_version}，请修改domains.txt，在ip_version输入4或者6。"
+                    fi
+                else
+                    err "record 为空，请检查"
+                fi
+            else
+                err "domain 为空，请检查"
+            fi
+        else
+            err "login_token 为空，请检查"
+        fi
     done
 }
 
@@ -469,7 +422,11 @@ exiterr() {
   exit 1
 }
 
+err() {
+  echo "ERROR: ${1}" >&2
+}
+
 main
-# clean
+clean
 
 exit 0
