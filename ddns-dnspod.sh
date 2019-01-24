@@ -37,7 +37,7 @@ read_xml_dom() {
 
 get_localip_curl()
 {
-    ip=$(curl "$1" 2>/dev/null)
+    ip=$(curl -4 "$1" 2>/dev/null)
     ip=$(echo "$ip" | grep -oE "(((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5]))\.){3}((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5]))")
     if [ "$ip" = '' ]; then
         return -1
@@ -47,16 +47,16 @@ get_localip_curl()
 
 get_localip()
 {
-    get_localip_curl 'api.ipify.org' ||
-    get_localip_curl 'whatismyip.akamai.com' ||
-    get_localip_curl 'myip.dnsomatic.com' ||
-    get_localip_curl 'ifconfig.me' ||
+    for server in ${GETIPV4[@]}
+    do
+        get_localip_curl "${server}" && return 0
+    done
     return -1
 }
 
 get_localip_curl_v6()
 {
-    ip=$(curl "$1" 2>/dev/null)
+    ip=$(curl -6 "$1" 2>/dev/null)
     ip=$(echo "$ip" | grep -oE "((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?")
     if [ "$ip" = '' ]; then
         return -1
@@ -66,11 +66,10 @@ get_localip_curl_v6()
 
 get_localip_v6()
 {
-    get_localip_curl_v6 'http://ipv6.vm0.test-ipv6.com/ip/' ||
-    get_localip_curl_v6 'http://ipv6.test-ipv6.ke.liquidtelecom.net/ip/' ||
-    get_localip_curl_v6 'http://ipv6.test-ipv6.arauc.br/ip/' ||
-    get_localip_curl_v6 'http://ipv6.test-ipv6.cl/ip/' ||
-    get_localip_curl_v6 'http://ipv6.test-ipv6.vyncke.org/ip/' ||
+    for server in ${GETIPV6[@]}
+    do
+        get_localip_curl "${server}" && return 0
+    done
     return -1
 }
 
