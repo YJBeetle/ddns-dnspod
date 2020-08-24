@@ -78,7 +78,7 @@ get_domain_id()
     domain=$2
 
     local DOMLVL=0 #初始化节点
-    curl -k https://dnsapi.cn/Domain.List -d "login_token=$login_token" 2>/dev/null > ${TMPDIR}/get_domain_id.xml
+    curl -k https://dnsapi.cn/Domain.List -d "format=xml&login_token=$login_token" 2>/dev/null > ${TMPDIR}/get_domain_id.xml
     while read_xml_dom; do
         if [ "$ENTITY" = 'item' ]; then
             itemlevel=$DOMLVL
@@ -128,7 +128,7 @@ get_record_id()
     id=''
     name=''
     okid=''
-    curl -k https://dnsapi.cn/Record.List -d "login_token=$login_token&domain_id=$domain_id&record_type=$record_type" 2>/dev/null > ${TMPDIR}/get_record_id.xml
+    curl -k https://dnsapi.cn/Record.List -d "format=xml&login_token=$login_token&domain_id=$domain_id&record_type=$record_type" 2>/dev/null > ${TMPDIR}/get_record_id.xml
     while read_xml_dom; do
         if [ "$ENTITY" = 'item' ]; then
             itemlevel=$DOMLVL
@@ -180,7 +180,7 @@ create_record()
 
     local DOMLVL=0 #初始化节点
 
-    curl -k https://dnsapi.cn/Record.Create -d "login_token=$login_token&domain_id=$domain_id&sub_domain=$record&record_type=$record_type&record_line=默认&value=$value" 2>/dev/null > ${TMPDIR}/create_record.xml
+    curl -k https://dnsapi.cn/Record.Create -d "format=xml&login_token=$login_token&domain_id=$domain_id&sub_domain=$record&record_type=$record_type&record_line=默认&value=$value" 2>/dev/null > ${TMPDIR}/create_record.xml
     while read_xml_dom; do
         if [ "$ENTITY" = 'id' ]; then
             id="$CONTENT"
@@ -211,7 +211,7 @@ ddns_record()
 
     local DOMLVL=0 #初始化节点
 
-    curl -k https://dnsapi.cn/Record.Ddns -d "login_token=$login_token&domain_id=$domain_id&record_id=$record_id&sub_domain=$record&record_line=默认" 2>/dev/null > ${TMPDIR}/create_ddns.xml
+    curl -k https://dnsapi.cn/Record.Ddns -d "format=xml&login_token=$login_token&domain_id=$domain_id&record_id=$record_id&sub_domain=$record&record_line=默认" 2>/dev/null > ${TMPDIR}/create_ddns.xml
     while read_xml_dom; do
         if [ "$ENTITY" = 'value' ]; then
             value="$CONTENT"
@@ -243,7 +243,7 @@ ddns_record_v6()
 
     local DOMLVL=0 #初始化节点
 
-    curl -k https://dnsapi.cn/Record.Modify -d "login_token=$login_token&domain_id=$domain_id&record_id=$record_id&sub_domain=$record&record_type=AAAA&record_line=默认&value=$ipv6" 2>/dev/null > ${TMPDIR}/create_ddns.xml
+    curl -k https://dnsapi.cn/Record.Modify -d "format=xml&login_token=$login_token&domain_id=$domain_id&record_id=$record_id&sub_domain=$record&record_type=AAAA&record_line=默认&value=$ipv6" 2>/dev/null > ${TMPDIR}/create_ddns.xml
     while read_xml_dom; do
         if [ "$ENTITY" = 'value' ]; then
             value="$CONTENT"
